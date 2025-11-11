@@ -180,10 +180,11 @@ class DeviceControlWidget(QWidget):
             btn.setCheckable(True)
             btn.setChecked(status)
             icon = QIcon.fromTheme("system-shutdown")
-            btn.setStyleSheet("background-color: green;" if status else "background-color: red;")
+
+            btn.setStyleSheet(f"background-color: {'#2c9527' if status else '#95282a'};")
             btn.toggled.connect(lambda checked, p=port: self.device.set_state(p, checked))
             btn.toggled.connect(lambda checked, p=port: print(f"Outlet {p} turned {'ON' if checked else 'OFF'}"))
-            btn.toggled.connect(lambda checked, b=btn: b.setStyleSheet("background-color: green;" if checked else "background-color: red;"))
+            btn.toggled.connect(lambda checked, b=btn: b.setStyleSheet(f"background-color: {'#2c9527' if checked else '#95282a'};"))
             btn.setIcon(icon)
             btn.setText("")
             port_layout.addWidget(label)
