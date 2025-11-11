@@ -198,7 +198,6 @@ class ControlWindow(QWidget):
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
         self.device_manager = DeviceManager()
-        # Set application icon to icon.svg located near this script
         script_dir = os.path.dirname(os.path.abspath(__file__))
         icon_path = os.path.join(script_dir, "icon.svg")
         if os.path.exists(icon_path):
