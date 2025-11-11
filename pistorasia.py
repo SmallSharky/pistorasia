@@ -1,16 +1,4 @@
 
-
-
-# devices = sispm.connect()
-
-# for dev in devices:
-#     minport = sispm.getminport(dev)
-#     maxport = sispm.getmaxport(dev)
-#     for port in range(minport, maxport + 1):
-#         print(sispm.getstatus(dev, port))
-
-
-
 import os
 import sys
 import argparse
