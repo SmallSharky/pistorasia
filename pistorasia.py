@@ -1,4 +1,20 @@
 #!/usr/bin/env python3
+# Pistorasia - USB Power Strip Controller
+# Copyright (C) 2025 SmallSharky
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 import sys
 import argparse
@@ -23,6 +39,7 @@ from PySide6.QtWidgets import QHBoxLayout
 from PySide6.QtWidgets import QGroupBox
 from PySide6.QtWidgets import QLayout
 from PySide6.QtWidgets import QTabBar
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 
@@ -157,7 +174,7 @@ class DeviceControlWidget(QWidget):
             status = self.device.get_status(port)
             port_layout = QHBoxLayout()
             label = QLineEdit(self.device.get_socket_name(port))
-            port_layout.addWidget(label)
+            label.setFixedWidth(200)
             label.editingFinished.connect(lambda p=port, l=label: self.edit_socket_name(l, p))
             btn = QPushButton("Power")
             btn.setCheckable(True)
@@ -169,8 +186,11 @@ class DeviceControlWidget(QWidget):
             btn.toggled.connect(lambda checked, b=btn: b.setStyleSheet("background-color: green;" if checked else "background-color: red;"))
             btn.setIcon(icon)
             btn.setText("")
+            port_layout.addWidget(label)
+            port_layout.addStretch()
             port_layout.addWidget(btn)
             layout.addLayout(port_layout)
+        layout.addStretch()
 
     def switch_outlet(self, outlet: int, checkbox: QCheckBox):
         self.device.set_state(outlet, checkbox.checkState() == Qt.Checked)
@@ -187,7 +207,8 @@ class DeviceControlWidget(QWidget):
 class ControlWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("SiS-PM Control Panel")
+        self.setWindowTitle("Pistorasia - SiS-PM Control Panel")
+        self.setMinimumSize(350, 300)
         layout = QVBoxLayout()
         toolbar = QToolBar()
         layout.addWidget(toolbar)
@@ -195,6 +216,10 @@ class ControlWindow(QWidget):
         refresh_button.setIcon(QIcon.fromTheme("view-refresh"))
         refresh_button.clicked.connect(self.refresh_devices)
         toolbar.addWidget(refresh_button)
+        about_button = QPushButton("About")
+        about_button.setIcon(QIcon.fromTheme("help-about"))
+        about_button.clicked.connect(self.show_about)
+        toolbar.addWidget(about_button)
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
         self.device_manager = DeviceManager()
@@ -205,7 +230,6 @@ class ControlWindow(QWidget):
         for device in self.device_manager.devices:
             device_widget = DeviceControlWidget(device)
             self.tabs.addTab(device_widget, device.get_name())
-            # Add a button to rename the device
             rename_button = QPushButton()
             rename_button.setIcon(QIcon.fromTheme("edit-rename"))
             rename_button.clicked.connect(lambda _, d=device: self.rename_device(d))
@@ -219,13 +243,32 @@ class ControlWindow(QWidget):
         text, ok = QInputDialog.getText(self, "Rename Device", "Enter new device name:", QLineEdit.Normal, device.get_name())
         if ok and text:
             device.set_name(text)
-            # Update tab title
             for i in range(self.tabs.count()):
-                # Get device id by widget's device id
                 widget = self.tabs.widget(i)
                 if widget and widget.device.id() == device.id():
                     self.tabs.setTabText(i, text)
                     break
+
+    def show_about(self):
+        about_text = (
+            "<h3>Pistorasia</h3>"
+            "<p>USB Power Strip Controller</p>"
+            "<p>Copyright (C) 2025 SmallSharky</p>"
+            "<p>This program is free software: you can redistribute it and/or modify "
+            "it under the terms of the GNU General Public License as published by "
+            "the Free Software Foundation, either version 3 of the License, or "
+            "(at your option) any later version.</p>"
+            "<p>This program is distributed in the hope that it will be useful, "
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
+            "GNU General Public License for more details.</p>"
+            "<p>You should have received a copy of the GNU General Public License "
+            "along with this program. If not, see "
+            "<a href='https://www.gnu.org/licenses/'>https://www.gnu.org/licenses/</a>.</p>"
+            "<p>USB device control powered by "
+            "<a href='https://github.com/xypron/pysispm'>pysispm</a></p>"
+        )
+        QMessageBox.about(self, "About Pistorasia", about_text)
 
     def refresh_devices(self):
         self.device_manager.refresh_devices()
@@ -247,7 +290,14 @@ class ControlWindow(QWidget):
 
 
 def cli_control():
-    parser = argparse.ArgumentParser(description="SiS-PM Command Line Control")
+    parser = argparse.ArgumentParser(
+        description="SiS-PM Command Line Control",
+        epilog="Pistorasia  Copyright (C) 2025 SmallSharky\n"
+               "This program comes with ABSOLUTELY NO WARRANTY.\n"
+               "This is free software, and you are welcome to redistribute it\n"
+               "under certain conditions; see LICENSE.md for details.",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("-l", "--list", action="store_true", help="List all connected SiS-PM devices")
     parser.add_argument("-d", "--device", type=str, help="Select device by index (starting from 0)")
     parser.add_argument("-o", "--outlet", type=str, help="Select outlet number")
