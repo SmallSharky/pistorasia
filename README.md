@@ -1,11 +1,10 @@
 # Pistorasia
-<div>
+<p>
   <img src="icon.svg" alt="Pistorasia Icon" width="128" height="128" style="float: left; margin-right: 20px; margin-bottom: 20px;">
-  <div>
-    <p>A simple GUI and CLI application for controlling SiS-PM USB power strips (EnerGenie EG-PMS and compatible devices).</p>
-  </div>
-  <div style="clear: both;"></div>
-</div>
+  <br clear="left"/>
+</p>
+
+A simple GUI and CLI application for controlling SiS-PM USB power strips (EnerGenie EG-PMS and compatible devices).
 
 ## Features
 
